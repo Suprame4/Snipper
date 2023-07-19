@@ -1,14 +1,26 @@
+/*
+To-do list:
+    Add mysql and sequlize 
+        Establish the relationships
+        Populate with data 
+    Complete week 2 and 3
+
+    Ask Jonathan about the repo being the same as my work stack 
+
+
+*/
+
 require('dotenv').config();
 const express = require('express');
 const app = express()
 const PORT  = process.env.PORT; 
 
 
-// array to store snippets
-const snippets = require('./seedData.json');
+//
+const { Snippet } = require('./database/Snippet');
 
 // generate a unique ID for each snippet
-let id = snippets.length + 1;
+let id = Snippet.length + 1;
 
 //create middleware to log the request 
 const requestLogger = ( req, res, next ) => {
@@ -27,8 +39,8 @@ app.use(express.json());
 app.use(requestLogger);
 
 
-// create a new snippet
-app.post('/snippet', (req, res) => {
+// create a new snippet - 
+app.post('/snippet', async (req, res) => {
   const { language, code } = req.body
 
   // basic validation
@@ -38,57 +50,62 @@ app.post('/snippet', (req, res) => {
       .json({ error: 'Language and code are required fields' })
   }
 
-  const snippet = {
-    id: id++,
-    language,
-    code
+  try {
+    const snippet = await Snippet.create({
+        id: id++,
+        language: language,
+        code: code
+    });
+
+    res.status(201).send(snippet.toJSON());
+  }
+  catch( error ){
+    console.error( error )
   }
 
-  snippets.push(snippet)
-  res.status(201).json(snippet)
 });
 
 // get all snippets
-app.get('/snippet', (req, res) => {
-  const { lang } = req.query
+app.get('/snippet', async (req, res, next) => {
+  
+try {
+    const { lang } = req.query
 
-  if (lang) {
-    const filteredSnippets = snippets.filter(
-      snippet => snippet.language.toLowerCase() === lang.toLowerCase()
-    )
-    return res.json(filteredSnippets)
+    if (lang) {
+
+        const snippet = await Snippet.findAll({ where: { language: lang }});
+
+        if( !snippet ){
+            return res.status(404).json({ error: 'Snippet not found' });
+        }
+
+        res.json(snippet);
+    }
+
+  
+    const snippets = await Snippet.findAll(); 
+    res.send(snippets); 
+
   }
-
-  res.json(snippets)
+  catch ( error ) {
+    console.error(error);
+    next(error); 
+  }
 });
 
 // get a snippet by ID
-app.get('/snippet/:id', (req, res) => {
-  const snippetId = parseInt(req.params.id)
-  const snippet = snippets.find(snippet => snippet.id === snippetId)
+app.get('/snippet/:id', async (req, res) => {
+
+
+  const snippet = await Snippet.findByPk(req.params.id);
 
   if (!snippet) {
     return res.status(404).json({ error: 'Snippet not found' })
   }
 
-  res.json(snippet)
+  res.json(snippet);
 });
 
-//Bonus: Users can make a GET request to e.g. /snippet?lang=python 
-//to retrieve all the Python snippets
-app.get('/snippet', (req, res) => {
-
-    const lang = req.query.lang;
-
-    //find the code snippet
-    const snippet = snippets.find(snip => snip.language === lang);
-
-    if( !snippet ){
-        return res.status(404).json({ error: 'Snippet not found' });
-    }
-
-    res.json(snippet);
-})
 
 // start the server
 app.listen(PORT, () => {
