@@ -39,8 +39,30 @@ const snippets = [
       language: "Java",
       code: "public class Rectangle {\n    private int width;\n    private int height;\n\n    public Rectangle(int width, int height) {\n        this.width = width;\n        this.height = height;\n    }\n\n    public int getArea() {\n        return width * height;\n    }\n}"
     }
-  ]
+  ];
+
+  const users = [
+    {
+      username: "brett",
+      name: "Brett BePassed",
+      password: "brettpass",
+      email: "brett@example.com"
+    },
+    {
+      username: "antonette",
+      name: "Antonette Marie",
+      password: "headfirst",
+      email: "keepyourheadonstraight@example.com"
+    },
+    {
+      username: "karianne",
+      name: "Karianne Krum",
+      password: "scarykary",
+      email: "dontbefrightened@example.com"
+    }
+  ];
 
   module.exports = {
-    snippets
+    snippets,
+    users
   };
