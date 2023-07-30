@@ -1,15 +1,16 @@
 const route = require('express').Router();
 const { encrypt, decrypt } = require('../utils/encrypt');
 
-const { Snippet } = require('../database/Snippet');
+const { sequelize } = require('../database/index');
+const { Snippet, findMaxId } = require('../database/Snippet')
 
 // generate a unique ID for each snippet
-let id = Snippet.length + 1;
+//let id = Snippet.length + 1;
 
 // create a new snippet - 
 route.post('/', async (req, res) => {
-    const { language, code } = req.body
-  
+    const { language, code } = req.body;
+
     // basic validation
     if (!language || !code) {
       return res
@@ -18,8 +19,8 @@ route.post('/', async (req, res) => {
     }
   
     try {
-      const snippet = await Snippet.create({
-          id: id++,
+
+        const snippet = await Snippet.create({
           language: language,
           code: code
       });
