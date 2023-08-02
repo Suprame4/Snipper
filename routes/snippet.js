@@ -3,12 +3,13 @@ const { encrypt, decrypt } = require('../utils/encrypt');
 
 const { sequelize } = require('../database/index');
 const { Snippet, findMaxId } = require('../database/Snippet')
+const { requiresAuth } = require('express-openid-connect')
 
 // generate a unique ID for each snippet
 //let id = Snippet.length + 1;
 
 // create a new snippet - 
-route.post('/', async (req, res) => {
+route.post('/', requiresAuth(), async (req, res) => {
     const { language, code } = req.body;
 
     // basic validation
@@ -34,7 +35,7 @@ route.post('/', async (req, res) => {
   });
   
   // get all snippets
-  route.get('/', async (req, res, next) => {
+  route.get('/', requiresAuth(), async (req, res, next) => {
     
   try {
       const { lang } = req.query
@@ -62,7 +63,7 @@ route.post('/', async (req, res) => {
   });
   
   // get a snippet by ID
-  route.get('/:id', async (req, res) => {
+  route.get('/:id', requiresAuth(), async (req, res) => {
   
     const snippet = await Snippet.findByPk(req.params.id);
   
